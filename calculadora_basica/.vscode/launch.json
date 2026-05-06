@@ -1,0 +1,11 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Flutter (Symlink Path)",
+            "request": "launch",
+            "type": "dart",
+            "cwd": "C:\\calculadora_dev"
+        }
+    ]
+}
