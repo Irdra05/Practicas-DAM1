@@ -18,6 +18,7 @@ class MainApp extends StatefulWidget {
 
 class _mainApp extends State<MainApp> {
   String _resultado = '';
+  String _ultimaPulsacion = '';
   bool _bloqueado = false;
 
   /** Este void se del refresco de pantalla de los botones al ser pulsados.
@@ -29,8 +30,14 @@ class _mainApp extends State<MainApp> {
       switch (valor.toUpperCase()) {
         case 'AC':
           _resultado = '';
-        case 'DEL': 
-          if (_resultado.isNotEmpty) _resultado = _resultado.substring(0, _resultado.length - 1);
+          _ultimaPulsacion = 'AC';
+
+        case 'DEL':
+          if (_ultimaPulsacion != '=') {
+            if (_resultado.isNotEmpty) _resultado = _resultado.substring(0, _resultado.length - 1);
+            _ultimaPulsacion = 'DEL';
+          }
+
         case '=':
           try {
             //Transformación del string
@@ -53,12 +60,29 @@ class _mainApp extends State<MainApp> {
                 _bloqueado = false;
               });
             });
+          } finally {
+            _ultimaPulsacion = valor;
           }
-          
+
         case '0':
+          if (_ultimaPulsacion == '=') _resultado = '';
           if (_resultado.isNotEmpty) _resultado += valor;
-        default:
+          _ultimaPulsacion = valor;
+
+        case ',':
+          if (_ultimaPulsacion == '=') _resultado = '';
+          if (_resultado.isEmpty) _resultado += '0' + valor;
+          else _resultado += valor;
+          _ultimaPulsacion = valor;
+
+        case '+' || '-' || '/' || 'x':
           _resultado += valor;
+          _ultimaPulsacion = valor;
+
+        default:
+          if (_ultimaPulsacion == '=') _resultado = '';
+          _resultado += valor;
+          _ultimaPulsacion = valor;
       }
     });
   }
