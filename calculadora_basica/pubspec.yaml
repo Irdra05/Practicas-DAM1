@@ -34,6 +34,8 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  math_expressions: ^3.1.0
+  flutter_native_splash: ^2.4.7
 
 dev_dependencies:
   flutter_test:
@@ -45,6 +47,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.4
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -87,3 +90,18 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/logoCalc.png"
+  # Para Android 8.0+, puedes añadir color de fondo:
+  adaptive_icon_background: "#FFFFFF" 
+  adaptive_icon_foreground: "assets/logoCalc.png"
+
+flutter_native_splash:
+  color: "#FFFFFF" # El color de fondo de la pantalla
+  image: assets/logoCalc.png # El icono que se verá en el centro
+  android_12:
+    image: assets/logoCalc.png
+    color: "#FFFFFF"

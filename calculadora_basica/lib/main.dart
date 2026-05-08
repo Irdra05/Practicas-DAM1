@@ -1,56 +1,178 @@
-import 'package:flutter/material.dart';
+import 'dart:io';
 
-import 'game.dart';
+import 'package:flutter/material.dart';
+import 'package:math_expressions/math_expressions.dart';
+
 void main() {
   runApp(const MainApp());
 }
 
-class MainApp extends StatelessWidget {
+/** Clase Main de la aplicación.
+ * 
+ */
+class MainApp extends StatefulWidget {
   const MainApp({super.key});
 
+  State<MainApp> createState() => _mainApp();
+}
+
+class _mainApp extends State<MainApp> {
+  String _resultado = '';
+  bool _bloqueado = false;
+
+  /** Este void se del refresco de pantalla de los botones al ser pulsados.
+   * 
+   */
+  void _onPressed(String valor) {
+    if (_bloqueado) return;
+    setState(() {
+      switch (valor.toUpperCase()) {
+        case 'AC':
+          _resultado = '';
+        case 'DEL': 
+          if (_resultado.isNotEmpty) _resultado = _resultado.substring(0, _resultado.length - 1);
+        case '=':
+          try {
+            //Transformación del string
+            _resultado = _resultado.replaceAll('x', '*').replaceAll(',', '.');
+            ExpressionParser parser = GrammarParser();
+            Expression expression = parser.parse(_resultado);
+
+            num res = RealEvaluator(ContextModel()).evaluate(expression);
+
+            _resultado = res.toString().replaceAll('.', ',');
+            if (_resultado.endsWith('.0')) _resultado = _resultado.substring(0, _resultado.length - 2);
+          } catch (e) {
+            setState(() {
+              _resultado = 'ERROR';
+              _bloqueado = true;
+            });
+            Future.delayed(Duration(seconds: 3), () {
+              setState(() {
+                _resultado = '';       
+                _bloqueado = false;
+              });
+            });
+          }
+          
+        case '0':
+          if (_resultado.isNotEmpty) _resultado += valor;
+        default:
+          _resultado += valor;
+      }
+    });
+  }
+
+  /**Este widget dibuja toda la estructura de la aplicación.
+   * 
+   */
+  @override
   Widget build(BuildContext content) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: Align(
-            alignment: Alignment.centerLeft,
-            child: Text('Birdle'),
-          ),
-        ),
-        body: Center(
-          child: Tile('A', HitType.hit),
+        body: SafeArea(
+          child: Container(
+            color: Colors.black87,
+            child: Column(
+              children: [
+                Expanded(
+                  flex: 4,
+                  child: Align(
+                    alignment: Alignment.bottomRight,
+                    child: Text(
+                      _resultado.isEmpty ? '0' : _resultado,
+                      style: TextStyle(fontSize: 65, color: Colors.white),
+                    )
+                  )
+                ),
+                Expanded(
+                  flex: 7,
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Expanded(child: Tile(contenido: 'DEL', color: Colors.blueGrey.shade700, funcion: () => _onPressed('DEL')), flex: 3),
+                            Expanded(child: Tile(contenido: 'AC', color: Colors.blueGrey.shade700, funcion: () => _onPressed('AC')), flex: 3),
+                            Expanded(child: Tile(contenido: '+', color: Colors.orangeAccent, funcion: () => _onPressed('+')), flex: 2),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Expanded(child: Tile(contenido: '1', color: Colors.grey.shade700, funcion: () => _onPressed('1'))),
+                            Expanded(child: Tile(contenido: '2', color: Colors.grey.shade700, funcion: () => _onPressed('2'))),
+                            Expanded(child: Tile(contenido: '3', color: Colors.grey.shade700, funcion: () => _onPressed('3'))),
+                            Expanded(child: Tile(contenido: '-', color: Colors.orangeAccent, funcion: () => _onPressed('-'))),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Expanded(child: Tile(contenido: '4', color: Colors.grey.shade700, funcion: () => _onPressed('4'))),
+                            Expanded(child: Tile(contenido: '5', color: Colors.grey.shade700, funcion: () => _onPressed('5'))),
+                            Expanded(child: Tile(contenido: '6', color: Colors.grey.shade700, funcion: () => _onPressed('6'))),
+                            Expanded(child: Tile(contenido: 'x', color: Colors.orangeAccent, funcion: () => _onPressed('x'))),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Expanded(child: Tile(contenido: '7', color: Colors.grey.shade700, funcion: () => _onPressed('7'))),
+                            Expanded(child: Tile(contenido: '8', color: Colors.grey.shade700, funcion: () => _onPressed('8'))),
+                            Expanded(child: Tile(contenido: '9', color: Colors.grey.shade700, funcion: () => _onPressed('9'))),
+                            Expanded(child: Tile(contenido: '/', color: Colors.orangeAccent, funcion: () => _onPressed('/'))),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Expanded(child: Tile(contenido: '0', color: Colors.grey.shade700, funcion: () => _onPressed('0')), flex: 2),
+                            Expanded(child: Tile(contenido: ',', color: Colors.grey.shade700, funcion: () => _onPressed(',')), flex: 1),
+                            Expanded(child: Tile(contenido: '=', color: Colors.orange, funcion: () => _onPressed('=')), flex: 1),
+                          ],
+                        ),
+                      )
+                    ],
+                  )
+                )
+              ],
+            ),
+          )
         ),
       ),
     );
   }
 }
 
+/** Esta clase dibuja los botones en pantalla.
+ * 
+ */
 class Tile extends StatelessWidget {
-  const Tile(this.letter, this.hitType, {super.key});
+  const Tile({super.key, required this.contenido, required this.color, required this.funcion});
 
-  final String letter;
-  final HitType hitType;
+  final String contenido;
+  final Color color;
+  final VoidCallback funcion;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 60,
-      width: 60,
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
-        color: switch (hitType) {
-          HitType.hit => Colors.green,
-          HitType.partial => Colors.yellow,
-          HitType.miss => Colors.grey,
-          _ => Colors.white
-        } 
-      ),
-      child: Center(
+    return Padding(
+      padding: EdgeInsets.all(8.0),
+      child: RawMaterialButton(
+        onPressed: funcion,
+        fillColor: color,
+        constraints: const BoxConstraints.expand(),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
         child: Text(
-          letter.toUpperCase(),
-          style: Theme.of(context).textTheme.titleLarge,
+          contenido,
+          style: TextStyle(color: Colors.white, fontSize: 25),
         ),
-      ),
+      )
     );
   }
 }
