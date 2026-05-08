@@ -41,7 +41,7 @@ class _mainApp extends State<MainApp> {
             num res = RealEvaluator(ContextModel()).evaluate(expression);
 
             _resultado = res.toString().replaceAll('.', ',');
-            if (_resultado.endsWith('.0')) _resultado = _resultado.substring(0, _resultado.length - 2);
+            if (_resultado.endsWith(',0')) _resultado = _resultado.substring(0, _resultado.length - 2);
           } catch (e) {
             setState(() {
               _resultado = 'ERROR';
